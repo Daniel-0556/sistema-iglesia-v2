@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Solicitudes pendientes{% endblock %}
+
+{% block contenido %}
+<h4 class="fw-bold mb-4">Solicitudes de eliminación pendientes</h4>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        {% if solicitudes %}
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Miembro</th>
+                    <th>Solicitado por</th>
+                    <th>Fecha</th>
+                    <th>Motivo</th>
+                    <th class="text-end pe-4">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in solicitudes %}
+                <tr>
+                    <td class="ps-4 fw-semibold">{{ s.persona.nombre_persona }}</td>
+                    <td class="text-muted">{{ s.solicitada_por.username }}</td>
+                    <td class="text-muted small">{{ s.fecha_solicitud|date:"d/m/Y H:i" }}</td>
+                    <td class="text-muted small">{{ s.motivo|default:"—" }}</td>
+                    <td class="text-end pe-4">
+                        <a href="{% url 'resolver_solicitud' s.pk %}"
+                           class="btn btn-sm btn-primary">
+                            <i class="bi bi-check2-square me-1"></i>Resolver
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-bell-slash fs-1 d-block mb-3"></i>
+                No hay solicitudes pendientes.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Historial de visitas{% endblock %}
+
+{% block contenido %}
+<h4 class="fw-bold mb-4">Historial de visitas</h4>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <div class="text-warning fw-semibold small">Pendientes</div>
+                <div class="fw-bold fs-4 text-warning">{{ pendientes }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <div class="text-success fw-semibold small">Realizadas</div>
+                <div class="fw-bold fs-4 text-success">{{ realizadas }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        {% if visitas %}
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Miembro</th>
+                    <th>Estado</th>
+                    <th>Fecha creación</th>
+                    <th>Fecha realizada</th>
+                    <th>Notas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in visitas %}
+                <tr>
+                    <td class="ps-4 fw-semibold">
+                        <i class="bi bi-person-circle text-muted me-2"></i>
+                        {{ v.persona.nombre_persona }}
+                    </td>
+                    <td>
+                        {% if v.estado == 'pendiente' %}
+                            <span class="badge bg-warning text-dark">Pendiente</span>
+                        {% else %}
+                            <span class="badge bg-success">Realizada</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-muted small">{{ v.fecha_creacion|date:"d/m/Y" }}</td>
+                    <td class="text-muted small">
+                        {{ v.fecha_realizada|date:"d/m/Y"|default:"—" }}
+                    </td>
+                    <td class="text-muted small">{{ v.notas|default:"—" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-clipboard-x fs-1 d-block mb-3"></i>
+                No hay visitas registradas aún.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

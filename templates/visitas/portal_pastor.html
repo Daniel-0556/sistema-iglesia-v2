@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Portal del Pastor{% endblock %}
+
+{% block contenido %}
+<h4 class="fw-bold mb-4">Portal del Pastor</h4>
+
+{% if total_eventos == 0 %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        Aún no hay eventos registrados. Los reportes aparecerán aquí una vez que se registren eventos.
+    </div>
+{% else %}
+
+<!-- Sección 1: Poca asistencia sin visita -->
+<div class="mb-5">
+    <h5 class="fw-semibold mb-3 text-danger">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        Poca asistencia — pendiente de visita
+        <span class="badge bg-danger ms-2">{{ sin_visita|length }}</span>
+    </h5>
+
+    {% if sin_visita %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Miembro</th>
+                        <th>Asistencia</th>
+                        <th class="text-end pe-4">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in sin_visita %}
+                    <tr>
+                        <td class="ps-4 fw-semibold">
+                            <i class="bi bi-person-circle text-muted me-2"></i>
+                            {{ item.miembro.nombre_persona }}
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress" style="width: 100px; height: 8px;">
+                                    <div class="progress-bar bg-danger"
+                                         style="width: {{ item.porcentaje }}%"></div>
+                                </div>
+                                <span class="text-danger fw-semibold small">{{ item.porcentaje }}%</span>
+                            </div>
+                        </td>
+                        <td class="text-end pe-4">
+                            {% if item.visita %}
+                                <a href="{% url 'realizar_visita' item.visita.pk %}"
+                                   class="btn btn-sm btn-success me-1">
+                                    <i class="bi bi-check-circle me-1"></i>Marcar realizada
+                                </a>
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-clock me-1"></i>Pendiente
+                                </span>
+                            {% else %}
+                                <a href="{% url 'marcar_visita' item.miembro.pk %}"
+                                   class="btn btn-sm btn-warning">
+                                    <i class="bi bi-person-check me-1"></i>Marcar visita
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle me-2"></i>
+            No hay miembros pendientes de visita.
+        </div>
+    {% endif %}
+</div>
+
+<!-- Sección 2: Visita realizada pero sigue con poca asistencia -->
+<div class="mb-5">
+    <h5 class="fw-semibold mb-3 text-warning">
+        <i class="bi bi-person-check me-2"></i>
+        Visita realizada — en seguimiento
+        <span class="badge bg-warning text-dark ms-2">{{ visita_realizada|length }}</span>
+    </h5>
+
+    {% if visita_realizada %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Miembro</th>
+                        <th>Asistencia</th>
+                        <th>Última visita</th>
+                        <th>Notas</th>
+                        <th class="text-end pe-4">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in visita_realizada %}
+                    <tr>
+                        <td class="ps-4 fw-semibold">
+                            <i class="bi bi-person-circle text-muted me-2"></i>
+                            {{ item.miembro.nombre_persona }}
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress" style="width: 100px; height: 8px;">
+                                    <div class="progress-bar bg-warning"
+                                         style="width: {{ item.porcentaje }}%"></div>
+                                </div>
+                                <span class="text-warning fw-semibold small">{{ item.porcentaje }}%</span>
+                            </div>
+                        </td>
+                        <td class="text-muted small">
+                            {{ item.visita_hecha.fecha_realizada|date:"d/m/Y"|default:"—" }}
+                        </td>
+                        <td class="text-muted small">
+                            {{ item.visita_hecha.notas|default:"—"|truncatechars:40 }}
+                        </td>
+                        <td class="text-end pe-4">
+                            <a href="{% url 'marcar_visita' item.miembro.pk %}"
+                               class="btn btn-sm btn-outline-warning">
+                                <i class="bi bi-arrow-repeat me-1"></i>Nueva visita
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+        <div class="text-muted small ps-1">No hay miembros en seguimiento.</div>
+    {% endif %}
+</div>
+
+<!-- Sección 3: Buena asistencia -->
+<div>
+    <h5 class="fw-semibold mb-3 text-success">
+        <i class="bi bi-check-circle me-2"></i>
+        Buena asistencia — 30% o más
+        <span class="badge bg-success ms-2">{{ buena_asistencia|length }}</span>
+    </h5>
+
+    {% if buena_asistencia %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Miembro</th>
+                        <th>Asistencia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in buena_asistencia %}
+                    <tr>
+                        <td class="ps-4 fw-semibold">
+                            <i class="bi bi-person-circle text-muted me-2"></i>
+                            {{ item.miembro.nombre_persona }}
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress" style="width: 100px; height: 8px;">
+                                    <div class="progress-bar bg-success"
+                                         style="width: {{ item.porcentaje }}%"></div>
+                                </div>
+                                <span class="text-success fw-semibold small">{{ item.porcentaje }}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endif %}
+{% endblock %}
